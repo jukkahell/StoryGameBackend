@@ -1,0 +1,1 @@
+export type NotificationType = "NEXT_WRITER" | "STORY_STARTED" | "STORY_FINISHED";
