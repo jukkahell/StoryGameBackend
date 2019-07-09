@@ -28,7 +28,7 @@ export class ConfigService {
     return this.envConfig.DB_USER;
   }
   get dbPass(): string {
-    return this.envConfig.DB_PASS;
+    return process.env.NODE_ENV !== "development" ? process.env.DB_PASSWORD : this.envConfig.DB_PASS;
   }
 
   get appPort(): string {
