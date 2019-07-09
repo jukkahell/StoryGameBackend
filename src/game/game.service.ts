@@ -137,6 +137,7 @@ export class GameService {
     }
     const query = "INSERT INTO user_games (game_id, user_id, position) VALUES ($1, $2, $3)";
     await this.db.query(query, [gameId, userId, game.users.length]);
+    this.notifyUserJoined(game, userId);
   }
 
   async start(gameId: string, userId: string) {
@@ -185,5 +186,26 @@ export class GameService {
     game.users.filter(u => u.id !== game.owner && u.fcm_token).forEach(u => {
       this.notificationService.sendNotification(u.fcm_token, payload);
     });
+  }
+
+  private async notifyUserJoined(game: Game, userId: string) {
+    // Get game again to get the correct nextWriter
+    const user = await this.userService.getUser(userId);
+    const payload: admin.messaging.MessagingPayload = {
+      notification: {
+        title: game.title,
+        body: `${user.username} joined`,
+      },
+      data: {
+        type: "USER_JOINED" as NotificationType,
+        gameId: game.id,
+        participants: String(game.users.length + 1),
+      },
+    };
+
+    const owner = game.users.find(u => u.id === game.owner);
+    if (owner.fcm_token) {
+      this.notificationService.sendNotification(owner.fcm_token, payload);
+    }
   }
 }
