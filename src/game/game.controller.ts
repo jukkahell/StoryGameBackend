@@ -12,7 +12,13 @@ export class GameController {
   @Get("/games")
   @UseGuards(AuthGuard("jwt"))
   async getGames(@LoggedInUser() user: User) {
-    return await this.gameService.getGames(user.id);
+    return await this.gameService.getOngoingGames(user.id);
+  }
+
+  @Get("/finishedGames")
+  @UseGuards(AuthGuard("jwt"))
+  async getFinishedGames(@LoggedInUser() user: User) {
+    return await this.gameService.getFinishedGames(user.id);
   }
 
   @Get("/game/:id")

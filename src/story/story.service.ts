@@ -50,9 +50,11 @@ export class StoryService {
     }
     if (result.rowCount > 0) {
       this.logger.log(`Successfully created story to position ${story.id} for game ${gameId} by author ${user.id}`, StoryService.name);
-      this.notifyNextWriter(game.id);
       game.stories.push(story);
-      await this.checkIfFinished(game);
+      const isFinished = await this.checkIfFinished(game);
+      if (!isFinished) {
+        this.notifyNextWriter(game.id);
+      }
       return result.rows[0];
     } else {
       this.logger.error(`Unable to create story. No ID returned.`, JSON.stringify(story), StoryService.name);
@@ -92,7 +94,9 @@ export class StoryService {
       const query = "UPDATE games SET status = $2 WHERE id = $1";
       await this.db.query(query, [game.id, "finished" as GameStatus]);
       this.notifyFinish(game.id);
+      return true;
     }
+    return false;
   }
 
   private async notifyFinish(gameId: string) {

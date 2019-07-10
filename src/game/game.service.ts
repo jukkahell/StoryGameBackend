@@ -1,6 +1,6 @@
 import { Injectable, InternalServerErrorException, NotFoundException, BadRequestException, ForbiddenException } from "@nestjs/common";
 import { LoggerService } from "nest-logger";
-import { Game, GameDBO } from "./game.interface";
+import { Game, GameDBO, GameStatus } from "./game.interface";
 import { DBService } from "../db/db.service";
 import * as uuid from "uuid";
 import { QueryResult } from "pg";
@@ -41,10 +41,18 @@ export class GameService {
     }
   }
 
-  async getGames(userId: string): Promise<Game[]> {
+  async getOngoingGames(userId: string): Promise<Game[]> {
+    return await this.getGames(userId, ["created", "started"]);
+  }
+
+  async getFinishedGames(userId: string): Promise<Game[]> {
+    return await this.getGames(userId, ["finished"]);
+  }
+
+  async getGames(userId: string, statuses: GameStatus[]): Promise<Game[]> {
     try {
-      const query = "SELECT g.* FROM games g JOIN user_games ug ON g.id = ug.game_id WHERE ug.user_id = $1";
-      const result = await this.db.query(query, [userId]);
+      const query = "SELECT g.* FROM games g JOIN user_games ug ON g.id = ug.game_id WHERE ug.user_id = $1 AND g.status = ANY($2)";
+      const result = await this.db.query(query, [userId, statuses]);
       if (result.rowCount > 0) {
         const games: GameDBO[] = result.rows;
         return Promise.all(games.map(g => this.mapGame(g)));
