@@ -5,6 +5,7 @@ import { LoggerModule } from "./logging/logger.module";
 import { AuthModule } from "./auth/auth.module";
 import { StoryModule } from "./story/story.module";
 import { NotificationModule } from "./firebase/notification.module";
+import { PingModule } from "./ping/ping.module";
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { NotificationModule } from "./firebase/notification.module";
     AuthModule,
     StoryModule,
     NotificationModule,
+    PingModule,
   ],
 })
 export class AppModule {}

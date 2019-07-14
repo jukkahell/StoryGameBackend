@@ -87,6 +87,35 @@ export class GameService {
   }
 
   async create(game: Game, user: User): Promise<Game> {
+    const errors = [];
+    if (game.settings.maxWords < game.settings.minWords) {
+      errors.push("max_words_smaller_than_min_words");
+    }
+    if (!game.settings.maxWords || !Number.isInteger(game.settings.maxWords) || game.settings.maxWords < 1) {
+      errors.push("max_words_invalid");
+    }
+    if (!game.settings.minWords || !Number.isInteger(game.settings.minWords) || game.settings.minWords < 1) {
+      errors.push("min_words_invalid");
+    }
+    if (!game.settings.roundsPerUser || !Number.isInteger(game.settings.roundsPerUser) || game.settings.roundsPerUser < 1) {
+      errors.push("rounds_per_user_invalid");
+    }
+    if (game.settings.wordsVisible && (!Number.isInteger(game.settings.wordsVisible) || game.settings.wordsVisible < 0)) {
+      errors.push("words_visible_invalid");
+    }
+    if (game.settings.maxParticipants && (!Number.isInteger(game.settings.maxParticipants) || game.settings.maxParticipants < 2)) {
+      errors.push("max_participants_invalid");
+    }
+    if (!game.settings.locale) {
+      errors.push("language_must_be_selected");
+    }
+    if (!game.title) {
+      errors.push("title_must_be_set");
+    }
+    if (errors.length > 0) {
+      throw new BadRequestException("Validation failed", errors.join(", "));
+    }
+
     game.id = uuid();
     const query = "INSERT INTO games (id, title, owner, settings) VALUES($1, $2, $3, $4) RETURNING *";
     let result: QueryResult;
@@ -142,6 +171,9 @@ export class GameService {
     }
     if (game.status === "started") {
       throw new ForbiddenException(`Game already started`, "ALREADY_STARTED");
+    }
+    if (game.settings.maxParticipants >= 2 && game.settings.maxParticipants < game.users.length + 1) {
+      throw new ForbiddenException(`Game already has maximum amount of participants.`, "GAME_IS_FULL");
     }
     const query = "INSERT INTO user_games (game_id, user_id, position) VALUES ($1, $2, $3)";
     await this.db.query(query, [gameId, userId, game.users.length]);

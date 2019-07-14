@@ -2,6 +2,7 @@ import { User } from "../user/user.interface";
 import { Story } from "../story/story.interface";
 
 export type GameStatus = "created" | "started" | "finished" | "deleted";
+export type PrivacyMode = "private" | "public_read" | "public_read_write";
 
 export interface Game {
   id: string;
@@ -26,11 +27,12 @@ export interface GameDBO {
 
 export interface Settings {
   locale: string;
-  public: boolean;
+  privacy: PrivacyMode;
   minWords: number;
   maxWords: number;
   roundsPerUser: number;
   wordsVisible: number;
+  maxParticipants: number;
 }
 
 export interface GameUser extends User {
