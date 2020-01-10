@@ -10,7 +10,14 @@ import { ConfigService } from "../config/config.service";
     {
       provide: LoggerService,
       useFactory: (config: ConfigService) => {
-        return new LoggerService(config.logLevel, config.serviceName, config.logAppenders, config.logFilePath);
+        const loggers = [
+          LoggerService.console({ serviceName: config.serviceName, colorize: true }),
+          LoggerService.rotate({ serviceName: config.serviceName, path: config.logFilePath }),
+        ];
+        return new LoggerService(
+          config.logLevel,
+          loggers,
+        );
       },
       inject: [ConfigService],
     },

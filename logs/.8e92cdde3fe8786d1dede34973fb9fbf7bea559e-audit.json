@@ -1,0 +1,14 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 10
+    },
+    "auditLog": "logs\\.8e92cdde3fe8786d1dede34973fb9fbf7bea559e-audit.json",
+    "files": [
+        {
+            "date": 1578611691803,
+            "name": "logs\\sanapeli-2020-01-10.log",
+            "hash": "a427ffeec1ce49eeb116796151e36279"
+        }
+    ]
+}
